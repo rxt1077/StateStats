@@ -12,14 +12,15 @@ Clone this git repository:
 ```bash
 git clone https://github.com/rxt1077/StateStats.git
 ```
-Make sure your JAVA_HOME is setup correctly and the hadoop binary is in your
-PATH:
+Make sure your HADOOP_CLASSPATH is setup correctly and the hadoop binary is in
+your PATH:
 ```bash
-echo $JAVA_HOME
-echo $PATH
+export PATH=$PATH:~/hadoop/bin
+export HADOOP_CLASSPATH=${JAVA_HOME}/lib/tools.jar
 ```
 Add the states data to HDFS (if it isn't already):
 ```bash
+hadoop fs -mkdir -p states
 hadoop fs -copyFromLocal states
 ```
 If you have old output data you will have to remove it:

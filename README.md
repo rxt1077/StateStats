@@ -41,10 +41,10 @@ hadoop jar state_stats.jar StateStats states
 
 ## Output
 * *output_statewise* This directory has a part file with the occurences of the
-search words used in each state. It has the form "<state:word> <occurences>".
+search words used in each state. It has the form "state:word occurences".
 * *output_dominant* This directory has a part file the the dominant state word
-usage in it. It has the form "<word> <state>".
+usage in it. It has the form "word state".
 * *output_ranking1* This directory has a part file with every state and its
-ranking of words. It has the form "<ranking> <state>".
+ranking of words. It has the form "ranking state".
 * *output_ranking2* This directory has a part file with every ranking and the
-states that share it. It has the form "<ranking> <state1,state2,state3...>"
+states that share it. It has the form "ranking state1,state2,state3..."

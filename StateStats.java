@@ -21,6 +21,24 @@ public class StateStats {
     private static List<String> search_for = Arrays.asList("education", "politics",
         "sports", "agriculture");
 
+    //utility class used to keep track of a String and int pair
+    private static class Pair {
+        String str;
+        int val;
+
+        Pair(String str, int val) {
+            this.str = str;
+            this.val = val;
+        }
+    }
+
+    //used to compare Pairs for sorting in descending order
+    private static class SortByVal implements Comparator<Pair> {
+        public int compare(Pair a, Pair b) {
+            return b.val - a.val;
+        }
+    }
+
     //This mapper handles the HTML files we were given
     public static class TokenizerMapper extends
         Mapper<Object, Text, Text, IntWritable> {
@@ -89,38 +107,20 @@ public class StateStats {
     public static class WordReducer extends
         Reducer<Text,Text,Text,Text> {
 
-        //used to keep track of a state and occurence pair
-        class StateOccurences {
-            String state;
-            int occurences;
-
-            StateOccurences(String state, int occurences) {
-                this.state = state;
-                this.occurences = occurences;
-            }
-        }
-
-        //used to compare StateOccurences for sorting in descending order
-        class SortByOccurences implements Comparator<StateOccurences> {
-            public int compare(StateOccurences a, StateOccurences b) {
-                return b.occurences - a.occurences;
-            }
-        }
-
         //find the state with the max occurences of the word and print it out
         public void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
             
-            ArrayList<StateOccurences> list = new ArrayList<StateOccurences>();
+            ArrayList<Pair> list = new ArrayList<Pair>();
             for (Text val : values) {
                 String[] parts = val.toString().split(":");
                 String state = parts[0];
                 int occurences = Integer.parseInt(parts[1]);
-                list.add(new StateOccurences(state, occurences));
+                list.add(new Pair(state, occurences));
             }
 
-            Collections.sort(list, new SortByOccurences());
-            context.write(key, new Text(list.get(0).state));
+            Collections.sort(list, new SortByVal());
+            context.write(key, new Text(list.get(0).str));
         }
     }
 
@@ -148,42 +148,24 @@ public class StateStats {
     public static class RankingReducer extends
         Reducer<Text,Text,Text,Text> {
 
-        //a pairing of a word and its occurences
-        class WordOccurences {
-            String word;
-            int occurences;
-            
-            WordOccurences(String word, int occurences) {
-                this.word = word;
-                this.occurences = occurences;
-            }
-        }
-
-        //used to compair WordOccurences for sorting in descending order
-        class SortByOccurences implements Comparator<WordOccurences> {
-            public int compare(WordOccurences a, WordOccurences b) {
-                return b.occurences - a.occurences;
-            }
-        }
-
         public void reduce(Text key, Iterable<Text> values, Context context)
             throws IOException, InterruptedException {
 
             //go through all the words for each state and keep track of
             //occurences
-            ArrayList<WordOccurences> list = new ArrayList<WordOccurences>();
+            ArrayList<Pair> list = new ArrayList<Pair>();
             for (Text val : values) {
                 String[] parts = val.toString().split(":");
                 String word = parts[0];
                 int occurences = Integer.parseInt(parts[1]);
-                list.add(new WordOccurences(word, occurences));
+                list.add(new Pair(word, occurences));
             }
 
             //sort and create ranking output
-            Collections.sort(list, new SortByOccurences());
+            Collections.sort(list, new SortByVal());
             String ranking = "";
-            for (WordOccurences wo : list) {
-                ranking += wo.word + ">";
+            for (Pair pair : list) {
+                ranking += pair.str + ">";
             }
             ranking = ranking.substring(0, ranking.length() - 1);
 
